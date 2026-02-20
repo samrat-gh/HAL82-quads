@@ -20,6 +20,18 @@ export const authOptions: NextAuthOptions = {
           where: {
             email: credentials.email,
           },
+          select: {
+            id: true,
+            userId: true,
+            email: true,
+            password: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            profilePicture: true,
+            createdAt: true,
+            updatedAt: true,
+          },
         });
 
         if (!user || !user.password) {
@@ -40,6 +52,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: `${user.firstName} ${user.lastName}`,
           role: user.role,
+          profilePicture: user.profilePicture,
         };
       },
     }),
@@ -56,6 +69,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.profilePicture = user.profilePicture;
       }
       return token;
     },
@@ -63,6 +77,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.profilePicture = token.profilePicture as string | null;
       }
       return session;
     },

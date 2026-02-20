@@ -39,9 +39,19 @@ export function DashboardNav() {
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6154] font-semibold text-sm text-white">
-              {session?.user?.name?.charAt(0).toUpperCase() || "U"}
-            </div>
+            {session?.user?.profilePicture ? (
+              <Image
+                src={session.user.profilePicture}
+                alt="Profile"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6154] font-semibold text-sm text-white">
+                {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+            )}
             <span className="hidden sm:inline">{session?.user?.name}</span>
             <svg
               className="h-4 w-4 text-gray-500"

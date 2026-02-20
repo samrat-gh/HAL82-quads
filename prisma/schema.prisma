@@ -8,15 +8,170 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @unique
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  role      String   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String            @unique
+  email            String            @unique
+  password         String
+  firstName        String
+  lastName         String
+  role             String
+  profilePicture   String?
+  bio              String?
+  location         String?
+  phoneNumber      String?
+  yearsOfExperience Int?
+  profileCompleted Boolean           @default(false)
+  profile          Profile?
+  founderProfile   FounderProfile?
+  cofounderProfile CoFounderProfile?
+  experiences      Experience[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   @@map("users")
+}
+
+model Profile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id])
+  websiteUrl      String
+  socialTwitter   String?
+  socialLinkedIn  String?
+  socialGithub    String?
+  socialInstagram String?
+  currentUsers    Int?
+  monthlyTraffic  Int?
+  monthlyRevenue  Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Experience {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  company     String
+  description String?
+  startDate   String
+  endDate     String?
+  isCurrent   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("experiences")
+}
+
+enum Stage {
+  IDEA
+  MVP
+  TRACTION
+}
+
+enum Skill {
+  TECH
+  DESIGN
+  GROWTH
+  OPS
+}
+
+enum Commitment {
+  FULL_TIME
+  PART_TIME
+}
+
+enum RiskAppetite {
+  CONSERVATIVE
+  BALANCED
+  AGGRESSIVE
+}
+
+enum WorkSpeed {
+  FAST
+  STRUCTURED
+}
+
+enum DecisionStyle {
+  DATA_DRIVEN
+  INTUITIVE
+  COLLABORATIVE
+}
+
+enum AmbitionLevel {
+  LIFESTYLE
+  SCALABLE
+  HYPERGROWTH
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+model FounderProfile {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String          @unique @db.ObjectId
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productName         String
+  description         String
+  stage               Stage
+  lookingForSkill     Skill
+  commitmentRequired  Commitment
+  riskAppetite        RiskAppetite
+  workSpeed           WorkSpeed
+  decisionStyle       DecisionStyle
+  ambitionLevel       AmbitionLevel
+  compatibilitiesAsFounder Compatibility[] @relation("FounderCompatibilities")
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@map("founder_profiles")
+}
+
+model CoFounderProfile {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String          @unique @db.ObjectId
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  primarySkill        Skill
+  secondarySkill      Skill?
+  experienceLevel     ExperienceLevel
+  preferredStage      Stage
+  availability        Commitment
+  riskAppetite        RiskAppetite
+  workSpeed           WorkSpeed
+  decisionStyle       DecisionStyle
+  ambitionLevel       AmbitionLevel
+  compatibilitiesAsCoFounder Compatibility[] @relation("CoFounderCompatibilities")
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@map("cofounder_profiles")
+}
+
+model Compatibility {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  founderId       String           @db.ObjectId
+  coFounderId     String           @db.ObjectId
+  founder         FounderProfile   @relation("FounderCompatibilities", fields: [founderId], references: [id], onDelete: Cascade)
+  coFounder       CoFounderProfile @relation("CoFounderCompatibilities", fields: [coFounderId], references: [id], onDelete: Cascade)
+  totalScore      Int
+  skillScore      Int
+  stageScore      Int
+  commitmentScore Int
+  riskScore       Int
+  workStyleScore  Int
+  decisionScore   Int
+  ambitionScore   Int
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([founderId, coFounderId])
+  @@index([founderId])
+  @@index([coFounderId])
+  @@index([totalScore])
+  @@map("compatibilities")
 }
