@@ -6,13 +6,17 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, firstName, lastName } = body;
+    const { email, password, firstName, lastName, role } = body;
 
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
+    }
+
+    if (!["founder", "cofounder", "investor"].includes(role.toLowerCase())) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         firstName,
         lastName,
+        role: role.toLowerCase(),
       },
     });
 

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { DashboardNav } from "@/components/dashboard-nav";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -32,22 +32,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="border-gray-100 border-b py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="rounded-lg p-1 font-bold text-2xl text-gray-900 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
-            CoFound
-          </Link>
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className="rounded px-4 py-2 font-medium text-gray-600 transition-colors hover:text-[#FF6154] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
-            Sign Out
-          </button>
-        </div>
-      </nav>
+      <DashboardNav />
 
       {/* Dashboard Content */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -58,6 +43,12 @@ export default function DashboardPage() {
           <p className="text-gray-600 text-lg">
             You're successfully logged in to CoFound.
           </p>
+          <p className="mt-2 text-gray-500 text-sm">
+            Role:{" "}
+            <span className="font-medium text-gray-700 capitalize">
+              {session.user?.role}
+            </span>
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -67,7 +58,9 @@ export default function DashboardPage() {
                 className="h-6 w-6 text-[#FF6154]"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -91,7 +84,9 @@ export default function DashboardPage() {
                 className="h-6 w-6 text-blue-600"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -114,7 +109,9 @@ export default function DashboardPage() {
                 className="h-6 w-6 text-green-600"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
