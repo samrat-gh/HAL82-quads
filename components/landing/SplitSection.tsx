@@ -1,33 +1,34 @@
 import Link from "next/link";
-import React from "react";
 
 export default function SplitSection() {
   return (
-    <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="grid gap-8 md:grid-cols-2 lg:gap-12">
         {/* For Founders */}
         <div
           id="for-founders"
-          className="bg-gray-900 rounded-3xl p-10 md:p-14 text-white hover:scale-[1.01] transition-transform duration-300">
-          <h3 className="text-sm font-bold text-[#FF6154] tracking-widest uppercase mb-4">
+          className="rounded-3xl bg-gray-900 p-10 text-white transition-transform duration-300 hover:scale-[1.01] md:p-14"
+        >
+          <h3 className="mb-4 font-bold text-[#FF6154] text-sm uppercase tracking-widest">
             For Founders
           </h3>
-          <h2 className="text-3xl font-bold mb-6 text-balance">
+          <h2 className="mb-6 text-balance font-bold text-3xl">
             Stop wasting time on coffee chats that go nowhere.
           </h2>
-          <p className="text-gray-300 mb-8 text-lg leading-relaxed text-pretty">
+          <p className="mb-8 text-pretty text-gray-300 text-lg leading-relaxed">
             Traditional networking feels like dating apps—superficial and
             exhausting. We help you skip the small talk and get straight to
             building with someone who gets it.
           </p>
-          <ul className="space-y-4 mb-10">
+          <ul className="mb-10 space-y-4">
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-[#FF6154] flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-[#FF6154]"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -42,10 +43,11 @@ export default function SplitSection() {
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-[#FF6154] flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-[#FF6154]"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -58,10 +60,11 @@ export default function SplitSection() {
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-[#FF6154] flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-[#FF6154]"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -74,7 +77,8 @@ export default function SplitSection() {
           </ul>
           <Link
             href="/join"
-            className="inline-block bg-white text-gray-900 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900">
+            className="inline-block rounded-full bg-white px-6 py-3 font-bold text-gray-900 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+          >
             Start Building
           </Link>
         </div>
@@ -82,26 +86,28 @@ export default function SplitSection() {
         {/* For Investors */}
         <div
           id="for-investors"
-          className="bg-gray-100 rounded-3xl p-10 md:p-14 text-gray-900 border border-gray-200 hover:scale-[1.01] transition-transform duration-300">
-          <h3 className="text-sm font-bold text-gray-500 tracking-widest uppercase mb-4">
+          className="rounded-3xl border border-gray-200 bg-gray-100 p-10 text-gray-900 transition-transform duration-300 hover:scale-[1.01] md:p-14"
+        >
+          <h3 className="mb-4 font-bold text-gray-500 text-sm uppercase tracking-widest">
             For Investors
           </h3>
-          <h2 className="text-3xl font-bold mb-6 text-balance">
+          <h2 className="mb-6 text-balance font-bold text-3xl">
             Spot the best teams before they even pitch.
           </h2>
-          <p className="text-gray-600 mb-8 text-lg leading-relaxed text-pretty">
+          <p className="mb-8 text-pretty text-gray-600 text-lg leading-relaxed">
             Deal flow is noisy. CoFound gives you a window into execution. See
             which teams are consistently shipping week over week before you
             write the check.
           </p>
-          <ul className="space-y-4 mb-10">
+          <ul className="mb-10 space-y-4">
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-gray-400 flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -122,10 +128,11 @@ export default function SplitSection() {
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-gray-400 flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -140,10 +147,11 @@ export default function SplitSection() {
             <li className="flex items-start gap-3">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-gray-400 flex-shrink-0"
+                className="h-6 w-6 flex-shrink-0 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -158,7 +166,8 @@ export default function SplitSection() {
           </ul>
           <Link
             href="/investors"
-            className="inline-block border-2 border-gray-900 text-gray-900 font-bold px-6 py-3 rounded-full hover:bg-gray-900 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2">
+            className="inline-block rounded-full border-2 border-gray-900 px-6 py-3 font-bold text-gray-900 transition-all hover:bg-gray-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+          >
             Join Investor Network
           </Link>
         </div>

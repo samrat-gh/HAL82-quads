@@ -1,32 +1,31 @@
-import React from "react";
-
 export default function ProblemSection() {
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-base font-semibold text-[#FF6154] tracking-wide uppercase mb-3">
+    <section className="bg-gray-50 py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-16 max-w-3xl text-center">
+          <h2 className="mb-3 font-semibold text-[#FF6154] text-base uppercase tracking-wide">
             The Problem
           </h2>
-          <p className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <p className="mb-4 font-bold text-3xl text-gray-900 md:text-4xl">
             Why do 65% of startups fail?
           </p>
-          <p className="text-lg text-gray-600">
+          <p className="text-gray-600 text-lg">
             It's not the market. It's not the product. It's often the
             people—specifically, co-founder conflict.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid gap-8 md:grid-cols-3">
           {/* Card 1 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-6">
+          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-red-50">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-red-500"
+                className="h-6 w-6 text-red-500"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -35,24 +34,25 @@ export default function ProblemSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-balance">
+            <h3 className="mb-3 text-balance font-bold text-gray-900 text-xl">
               Skill Mismatch
             </h3>
-            <p className="text-gray-600 leading-relaxed text-pretty">
+            <p className="text-pretty text-gray-600 leading-relaxed">
               Two visionary CEOs with no technical talent, or two engineers with
               no sales skills. Building requires complementary capabilities.
             </p>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center mb-6">
+          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-orange-500"
+                className="h-6 w-6 text-orange-500"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -67,24 +67,25 @@ export default function ProblemSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-balance">
+            <h3 className="mb-3 text-balance font-bold text-gray-900 text-xl">
               Vision Misalignment
             </h3>
-            <p className="text-gray-600 leading-relaxed text-pretty">
+            <p className="text-pretty text-gray-600 leading-relaxed">
               Different long-term goals or definitions of success lead to
               friction when tough decisions need to be made.
             </p>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
+          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
               <svg
                 aria-hidden="true"
-                className="w-6 h-6 text-gray-600"
+                className="h-6 w-6 text-gray-600"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -93,10 +94,10 @@ export default function ProblemSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-balance">
+            <h3 className="mb-3 text-balance font-bold text-gray-900 text-xl">
               Execution Gaps
             </h3>
-            <p className="text-gray-600 leading-relaxed text-pretty">
+            <p className="text-pretty text-gray-600 leading-relaxed">
               Without structured progress tracking, it's hard to know if your
               potential partner can actually deliver on their promises.
             </p>

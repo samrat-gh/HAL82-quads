@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+import AuthProvider from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
@@ -15,28 +15,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        elements: {
-          logo: "hidden",
-          footer: "hidden",
-          cardFooter: "hidden",
-          userButtonPopoverFooter: "hidden",
-        },
-      }}>
-      <html lang="en" suppressHydrationWarning>
-        <head />
-        <body className="">
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body className="">
+        <AuthProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
             enableSystem={false}
             disableTransitionOnChange
-            forcedTheme="light">
+            forcedTheme="light"
+          >
             {children}
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

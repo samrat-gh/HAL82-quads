@@ -1,116 +1,120 @@
 import Link from "next/link";
-import React from "react";
 
 export default function Hero() {
   return (
-    <section className="pt-32 pb-20 md:pt-40 md:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-      <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 mb-6 max-w-4xl mx-auto leading-tight text-balance">
+    <section className="mx-auto max-w-7xl px-4 pt-32 pb-20 text-center sm:px-6 md:pt-40 md:pb-28 lg:px-8">
+      <h1 className="mx-auto mb-6 max-w-4xl text-balance font-bold text-5xl text-gray-900 leading-tight tracking-tight md:text-6xl lg:text-7xl">
         Find the Right Co-Founder. <br className="hidden md:block" />
         <span className="text-[#FF6154]">Build With Alignment.</span>
       </h1>
-      <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
+      <p className="mx-auto mb-10 max-w-2xl text-balance text-gray-600 text-xl leading-relaxed md:text-2xl">
         Stop guessing. Match based on complementary skills, shared vision, and
         working style compatibility.
       </p>
-      <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
         <Link
           href="/join"
-          className="w-full sm:w-auto px-8 py-4 bg-[#FF6154] hover:bg-[#ff4f40] text-white rounded-full font-semibold text-lg transition-all shadow-lg hover:shadow-[#FF6154]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
+          className="w-full rounded-full bg-[#FF6154] px-8 py-4 font-semibold text-lg text-white shadow-lg transition-all hover:bg-[#ff4f40] hover:shadow-[#FF6154]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2 sm:w-auto"
+        >
           Get Started
         </Link>
         <Link
           href="#how-it-works"
-          className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-300 rounded-full font-semibold text-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2">
+          className="w-full rounded-full border-2 border-gray-200 bg-white px-8 py-4 font-semibold text-gray-900 text-lg transition-all hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 sm:w-auto"
+        >
           Learn More
         </Link>
       </div>
 
       {/* Hero Visual */}
-      <div className="mt-20 relative max-w-5xl mx-auto">
-        <div className="relative rounded-3xl bg-gray-50 border border-gray-100 p-4 md:p-8 overflow-hidden shadow-2xl shadow-gray-100/50">
+      <div className="relative mx-auto mt-20 max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 p-4 shadow-2xl shadow-gray-100/50 md:p-8">
           {/* Subtle background pattern */}
           <div
             className="absolute inset-0 opacity-[0.03]"
             style={{
               backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
               backgroundSize: "24px 24px",
-            }}></div>
+            }}
+          ></div>
 
-          <div className="relative flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center py-12 md:py-20">
+          <div className="relative flex flex-col items-center justify-center gap-6 py-12 md:flex-row md:gap-12 md:py-20">
             {/* Founder Profile Card 1 */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-64 md:w-72 transform -rotate-3 transition-transform hover:rotate-0 hover:z-10 duration-500 ease-out">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+            <div className="-rotate-3 w-64 transform rounded-2xl border border-gray-100 bg-white p-6 shadow-lg transition-transform duration-500 ease-out hover:z-10 hover:rotate-0 md:w-72">
+              <div className="mb-4 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600 text-lg">
                   JD
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">John Doe</div>
-                  <div className="text-xs text-gray-500 font-medium tracking-wide">
+                  <div className="font-medium text-gray-500 text-xs tracking-wide">
                     Founder@FinLabs
                   </div>
                 </div>
               </div>
-              <div className="space-y-2 mb-4">
+              <div className="mb-4 space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     Strategist
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     Marketting
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     System Design
                   </span>
                 </div>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-gray-400 text-xs">
                 Looking for: Founding Engineer
               </div>
             </div>
 
             {/* Connection Badge */}
-            <div className="z-10 bg-white rounded-full p-2 shadow-xl border border-gray-100 transform scale-110 animate-pulse md:absolute">
-              <div className="bg-green-50 text-green-700 font-bold px-4 py-2 rounded-full flex items-center gap-2">
+            <div className="z-10 scale-110 transform animate-pulse rounded-full border border-gray-100 bg-white p-2 shadow-xl md:absolute">
+              <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 font-bold text-green-700">
                 <svg
-                  className="w-4 h-4"
+                  className="h-4 w-4"
                   fill="currentColor"
-                  viewBox="0 0 20 20">
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"></path>
+                    clipRule="evenodd"
+                  ></path>
                 </svg>
                 98% Match
               </div>
             </div>
 
             {/* Founder Profile Card 2 */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-64 md:w-72 transform rotate-3 transition-transform hover:rotate-0 hover:z-10 duration-500 ease-out">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-[#FF6154]/20 flex items-center justify-center text-[#FF6154] font-bold text-lg">
+            <div className="w-64 rotate-3 transform rounded-2xl border border-gray-100 bg-white p-6 shadow-lg transition-transform duration-500 ease-out hover:z-10 hover:rotate-0 md:w-72">
+              <div className="mb-4 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FF6154]/20 font-bold text-[#FF6154] text-lg">
                   AS
                 </div>
                 <div>
                   <div className="font-bold text-gray-900">Sarah Smith</div>
-                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                  <div className="font-medium text-gray-500 text-xs uppercase tracking-wide">
                     Product & Sales
                   </div>
                 </div>
               </div>
-              <div className="space-y-2 mb-4">
+              <div className="mb-4 space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     Fullstack Dev
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     Indie Dev
                   </span>
-                  <span className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 font-medium">
+                  <span className="rounded bg-gray-100 px-2 py-1 font-medium text-gray-600 text-xs">
                     Product
                   </span>
                 </div>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-gray-400 text-xs">
                 Looking for: Opportunities
               </div>
             </div>

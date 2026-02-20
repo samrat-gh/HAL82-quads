@@ -36,6 +36,7 @@
         "noUselessTypeConstraint": "error"
       },
       "correctness": {
+        "useUniqueElementIds": "off",
         "noUnusedVariables": "warn",
         "noUnusedImports": "error",
         "noChildrenProp": "error",
