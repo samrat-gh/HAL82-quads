@@ -50,6 +50,8 @@ export async function POST(request: Request) {
     const {
       productName,
       description,
+      productUrl,
+      startedDate,
       stage,
       lookingForSkill,
       commitmentRequired,
@@ -64,6 +66,8 @@ export async function POST(request: Request) {
       update: {
         productName,
         description,
+        productUrl,
+        startedDate,
         stage,
         lookingForSkill,
         commitmentRequired,
@@ -76,6 +80,8 @@ export async function POST(request: Request) {
         userId: user.id,
         productName,
         description,
+        productUrl,
+        startedDate,
         stage,
         lookingForSkill,
         commitmentRequired,

@@ -35,7 +35,7 @@ model Profile {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @unique @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
-  websiteUrl      String
+  websiteUrl      String?
   socialTwitter   String?
   socialLinkedIn  String?
   socialGithub    String?
@@ -118,6 +118,8 @@ model FounderProfile {
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   productName         String
   description         String
+  productUrl          String
+  startedDate         String
   stage               Stage
   lookingForSkill     Skill
   commitmentRequired  Commitment
@@ -141,6 +143,7 @@ model CoFounderProfile {
   experienceLevel     ExperienceLevel
   preferredStage      Stage
   availability        Commitment
+  activelySeeking     Boolean         @default(false)
   riskAppetite        RiskAppetite
   workSpeed           WorkSpeed
   decisionStyle       DecisionStyle

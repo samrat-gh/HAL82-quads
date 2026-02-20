@@ -11,6 +11,7 @@ interface FormData {
   experienceLevel: string;
   preferredStage: string;
   availability: string;
+  activelySeeking: boolean;
   riskAppetite: string;
   workSpeed: string;
   decisionStyle: string;
@@ -28,6 +29,7 @@ export default function CoFounderOnboardingPage() {
     experienceLevel: "MID",
     preferredStage: "IDEA",
     availability: "FULL_TIME",
+    activelySeeking: false,
     riskAppetite: "BALANCED",
     workSpeed: "FAST",
     decisionStyle: "COLLABORATIVE",
@@ -85,10 +87,19 @@ export default function CoFounderOnboardingPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
+  ) => {
+    const target = e.target;
+    const value =
+      target.type === "checkbox"
+        ? (target as HTMLInputElement).checked
+        : target.value;
+    const name = target.name;
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -237,6 +248,29 @@ export default function CoFounderOnboardingPage() {
                   <option value="FULL_TIME">Full-Time</option>
                   <option value="PART_TIME">Part-Time</option>
                 </select>
+              </div>
+
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    name="activelySeeking"
+                    checked={formData.activelySeeking}
+                    onChange={handleChange}
+                    className="mt-1 h-5 w-5 rounded border-gray-300 text-[#FF6154] focus:ring-2 focus:ring-[#FF6154] focus:ring-offset-2"
+                  />
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">
+                      Actively Seeking Opportunities
+                    </span>
+                    <p className="mt-1 text-gray-600 text-xs leading-relaxed">
+                      By checking this, you indicate that you are immediately
+                      available to join a founding team and can commit within
+                      the next 2-4 weeks. This helps founders identify
+                      candidates ready to start right away.
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           </div>

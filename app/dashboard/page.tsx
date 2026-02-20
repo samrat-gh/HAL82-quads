@@ -51,6 +51,13 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
 
+  // Filter states
+  const [minScore, setMinScore] = useState<number>(0);
+  const [skillFilter, setSkillFilter] = useState<string>("all");
+  const [stageFilter, setStageFilter] = useState<string>("all");
+  const [experienceFilter, setExperienceFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("score");
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/join");
@@ -125,6 +132,73 @@ export default function DashboardPage() {
     };
   };
 
+  // Filter and sort matches
+  const filteredMatches = matches
+    .filter((match) => {
+      // Score filter
+      if (match.totalScore < minScore) return false;
+
+      if (role === "founder" && match.coFounder) {
+        // Skill filter for cofounders
+        if (
+          skillFilter !== "all" &&
+          match.coFounder.primarySkill !== skillFilter
+        ) {
+          return false;
+        }
+        // Experience filter
+        if (
+          experienceFilter !== "all" &&
+          match.coFounder.experienceLevel !== experienceFilter
+        ) {
+          return false;
+        }
+      }
+
+      if (role === "cofounder" && match.founder) {
+        // Stage filter for founders
+        if (stageFilter !== "all" && match.founder.stage !== stageFilter) {
+          return false;
+        }
+        // Looking for skill filter
+        if (
+          skillFilter !== "all" &&
+          match.founder.lookingForSkill !== skillFilter
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "score") {
+        return b.totalScore - a.totalScore;
+      }
+      if (sortBy === "skill") {
+        const aSkill =
+          role === "founder"
+            ? a.coFounder?.primarySkill || ""
+            : a.founder?.lookingForSkill || "";
+        const bSkill =
+          role === "founder"
+            ? b.coFounder?.primarySkill || ""
+            : b.founder?.lookingForSkill || "";
+        const skillCompare = aSkill.localeCompare(bSkill);
+        // If skills are the same, sort by score descending
+        return skillCompare !== 0 ? skillCompare : b.totalScore - a.totalScore;
+      }
+      if (sortBy === "stage") {
+        const aStage = a.founder?.stage || "";
+        const bStage = b.founder?.stage || "";
+        const stageCompare = aStage.localeCompare(bStage);
+        // If stages are the same, sort by score descending
+        return stageCompare !== 0 ? stageCompare : b.totalScore - a.totalScore;
+      }
+      // Default to score descending
+      return b.totalScore - a.totalScore;
+    });
+
   if (status === "loading" || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -165,16 +239,14 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => router.push("/profile/create")}
-              className="rounded-2xl border border-gray-100 bg-white p-6 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2"
-            >
+              className="rounded-2xl border border-gray-100 bg-white p-6 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#FF6154]/10">
                 <svg
                   className="h-6 w-6 text-[#FF6154]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  aria-hidden="true"
-                >
+                  aria-hidden="true">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -207,21 +279,145 @@ export default function DashboardPage() {
             {role === "founder" ? "Find Your Co-Founder" : "Find Your Venture"}
           </h1>
           <p className="text-gray-600 text-lg">
-            {matches.length > 0
-              ? `${matches.length} potential ${role === "founder" ? "co-founders" : "ventures"} based on compatibility`
-              : "No matches found yet. Check back soon!"}
+            {filteredMatches.length > 0
+              ? `${filteredMatches.length} potential ${role === "founder" ? "co-founders" : "ventures"} based on compatibility`
+              : matches.length > 0
+                ? "No matches found with current filters. Try adjusting your filters."
+                : "No matches found yet. Check back soon!"}
           </p>
         </div>
 
-        {matches.length === 0 ? (
+        {/* Filter Controls */}
+        {matches.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-bold text-gray-900 text-lg">Filters</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setMinScore(0);
+                  setSkillFilter("all");
+                  setStageFilter("all");
+                  setExperienceFilter("all");
+                  setSortBy("score");
+                }}
+                className="text-[#FF6154] text-sm transition-colors hover:text-[#FF6154]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
+                Clear All
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Minimum Score Filter */}
+              <div>
+                <label
+                  htmlFor="minScore"
+                  className="mb-2 block font-medium text-gray-700 text-sm">
+                  Min. Compatibility
+                </label>
+                <select
+                  id="minScore"
+                  value={minScore}
+                  onChange={(e) => setMinScore(Number(e.target.value))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                  <option value={0}>All Scores</option>
+                  <option value={50}>50% or higher</option>
+                  <option value={60}>60% or higher</option>
+                  <option value={70}>70% or higher</option>
+                  <option value={75}>75% or higher</option>
+                  <option value={80}>80% or higher</option>
+                </select>
+              </div>
+
+              {/* Skill Filter */}
+              <div>
+                <label
+                  htmlFor="skillFilter"
+                  className="mb-2 block font-medium text-gray-700 text-sm">
+                  {role === "founder" ? "Cofounder Skill" : "Looking For"}
+                </label>
+                <select
+                  id="skillFilter"
+                  value={skillFilter}
+                  onChange={(e) => setSkillFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                  <option value="all">All Skills</option>
+                  <option value="TECH">Tech</option>
+                  <option value="DESIGN">Design</option>
+                  <option value="GROWTH">Growth</option>
+                  <option value="OPS">Ops</option>
+                </select>
+              </div>
+
+              {/* Stage/Experience Filter */}
+              {role === "cofounder" ? (
+                <div>
+                  <label
+                    htmlFor="stageFilter"
+                    className="mb-2 block font-medium text-gray-700 text-sm">
+                    Project Stage
+                  </label>
+                  <select
+                    id="stageFilter"
+                    value={stageFilter}
+                    onChange={(e) => setStageFilter(e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                    <option value="all">All Stages</option>
+                    <option value="IDEA">Idea</option>
+                    <option value="MVP">MVP</option>
+                    <option value="TRACTION">Traction</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label
+                    htmlFor="experienceFilter"
+                    className="mb-2 block font-medium text-gray-700 text-sm">
+                    Experience Level
+                  </label>
+                  <select
+                    id="experienceFilter"
+                    value={experienceFilter}
+                    onChange={(e) => setExperienceFilter(e.target.value)}
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                    <option value="all">All Levels</option>
+                    <option value="JUNIOR">Junior</option>
+                    <option value="MID">Mid</option>
+                    <option value="SENIOR">Senior</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Sort By */}
+              <div>
+                <label
+                  htmlFor="sortBy"
+                  className="mb-2 block font-medium text-gray-700 text-sm">
+                  Sort By
+                </label>
+                <select
+                  id="sortBy"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                  <option value="score">Compatibility Score</option>
+                  <option value="skill">Skill/Expertise</option>
+                  {role === "cofounder" && (
+                    <option value="stage">Project Stage</option>
+                  )}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {filteredMatches.length === 0 ? (
           <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm">
             <svg
               className="mx-auto h-16 w-16 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              aria-hidden="true"
-            >
+              aria-hidden="true">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -233,13 +429,14 @@ export default function DashboardPage() {
               No Matches Yet
             </h3>
             <p className="mt-2 text-gray-600">
-              We're constantly adding new users. Check back soon to find your
-              perfect match!
+              {matches.length > 0
+                ? "No matches found with current filters. Try adjusting your filters above."
+                : "We're constantly adding new users. Check back soon to find your perfect match!"}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {matches.map((match) => {
+            {filteredMatches.map((match) => {
               const badge = getCompatibilityBadge(match.totalScore);
               const isExpanded = expandedMatch === match.id;
               const matchData =
@@ -248,8 +445,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={match.id}
-                  className="rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
-                >
+                  className="rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
                   <div className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -300,8 +496,7 @@ export default function DashboardPage() {
                           {match.totalScore}%
                         </div>
                         <span
-                          className={`inline-block rounded-full px-3 py-1 font-medium text-xs ${badge.color}`}
-                        >
+                          className={`inline-block rounded-full px-3 py-1 font-medium text-xs ${badge.color}`}>
                           {badge.label}
                         </span>
                       </div>
@@ -313,15 +508,13 @@ export default function DashboardPage() {
                         onClick={() =>
                           router.push(`/profile/${matchData?.user.userId}`)
                         }
-                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#FF6154] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#FF6154]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2"
-                      >
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#FF6154] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#FF6154]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
                         <svg
                           className="h-4 w-4"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
-                          aria-hidden="true"
-                        >
+                          aria-hidden="true">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -337,16 +530,14 @@ export default function DashboardPage() {
                         onClick={() =>
                           setExpandedMatch(isExpanded ? null : match.id)
                         }
-                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2"
-                      >
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
                         {isExpanded ? "Hide" : "View"} Breakdown
                         <svg
                           className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
-                          aria-hidden="true"
-                        >
+                          aria-hidden="true">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"

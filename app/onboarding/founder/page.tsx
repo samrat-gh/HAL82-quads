@@ -8,6 +8,8 @@ import { DashboardNav } from "@/components/dashboard-nav";
 interface FormData {
   productName: string;
   description: string;
+  productUrl: string;
+  startedDate: string;
   stage: string;
   lookingForSkill: string;
   commitmentRequired: string;
@@ -25,6 +27,8 @@ export default function FounderOnboardingPage() {
   const [formData, setFormData] = useState<FormData>({
     productName: "",
     description: "",
+    productUrl: "",
+    startedDate: "",
     stage: "IDEA",
     lookingForSkill: "TECH",
     commitmentRequired: "FULL_TIME",
@@ -64,8 +68,13 @@ export default function FounderOnboardingPage() {
     setError("");
     setIsLoading(true);
 
-    if (!formData.productName || !formData.description) {
-      setError("Product name and description are required");
+    if (
+      !formData.productName ||
+      !formData.description ||
+      !formData.productUrl ||
+      !formData.startedDate
+    ) {
+      setError("Product name, description, URL, and started date are required");
       setIsLoading(false);
       return;
     }
@@ -176,6 +185,41 @@ export default function FounderOnboardingPage() {
                   onChange={handleChange}
                   className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
                   placeholder="Describe your product and vision"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="productUrl"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Product URL <span className="text-[#FF6154]">*</span>
+                </label>
+                <input
+                  id="productUrl"
+                  name="productUrl"
+                  type="url"
+                  required
+                  value={formData.productUrl}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
+                  placeholder="https://yourproduct.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="startedDate"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Started Date <span className="text-[#FF6154]">*</span>
+                </label>
+                <input
+                  id="startedDate"
+                  name="startedDate"
+                  type="month"
+                  required
+                  value={formData.startedDate}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
                 />
               </div>
 

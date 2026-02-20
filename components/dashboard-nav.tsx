@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,13 @@ import {
 export function DashboardNav() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [imageError, setImageError] = useState(false);
+
+  // Reset image error when profile picture changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only reset when profilePicture URL changes
+  useEffect(() => {
+    setImageError(false);
+  }, [session?.user?.profilePicture]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -39,13 +47,14 @@ export function DashboardNav() {
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-3 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
-            {session?.user?.profilePicture ? (
+            {session?.user?.profilePicture && !imageError ? (
               <Image
                 src={session.user.profilePicture}
                 alt="Profile"
                 width={32}
                 height={32}
                 className="h-8 w-8 rounded-full object-cover"
+                onError={() => setImageError(true)}
               />
             ) : (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6154] font-semibold text-sm text-white">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -16,11 +17,27 @@ interface Profile {
   monthlyRevenue?: number;
 }
 
+interface FounderProfile {
+  productName: string;
+  description: string;
+  productUrl: string;
+  startedDate: string;
+  stage: string;
+  lookingForSkill: string;
+}
+
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -36,6 +53,15 @@ export default function ProfilePage() {
           const data = await response.json();
           setProfile(data.profile);
         }
+
+        // Fetch founder profile if user is a founder
+        if (session?.user?.role?.toLowerCase() === "founder") {
+          const founderResponse = await fetch("/api/founder-profile");
+          if (founderResponse.ok) {
+            const founderData = await founderResponse.json();
+            setFounderProfile(founderData.profile);
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch profile:", error);
       } finally {
@@ -46,7 +72,92 @@ export default function ProfilePage() {
     if (status === "authenticated") {
       fetchProfile();
     }
-  }, [status]);
+  }, [status, session?.user?.role]);
+
+  // Reset image error when profile picture changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only reset when profilePicture URL changes
+  useEffect(() => {
+    setImageError(false);
+  }, [session?.user?.profilePicture]);
+
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please upload a valid image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Image size should be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+
+      if (uploadResponse.ok) {
+        // Update user profile with new picture
+        const updateResponse = await fetch("/api/user/update-picture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profilePicture: uploadData.url }),
+        });
+
+        if (updateResponse.ok) {
+          // Refresh session to get updated profile picture
+          await update();
+          setImageError(false);
+        } else {
+          setUploadError("Failed to update profile picture");
+        }
+      } else {
+        setUploadError(uploadData.error || "Failed to upload image");
+      }
+    } catch (_error) {
+      setUploadError("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  console.log(session);
 
   if (status === "loading" || isLoading) {
     return (
@@ -309,24 +420,206 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Founder Product Details Card - Only for Founders */}
+          {session.user?.role?.toLowerCase() === "founder" && (
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="font-bold text-gray-900 text-xl">
+                  Product Information
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding/founder")}
+                  className="rounded-lg border border-gray-200 px-4 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
+                  {founderProfile ? "Edit" : "Add Product"}
+                </button>
+              </div>
+
+              {founderProfile ? (
+                <div className="space-y-6">
+                  {/* Product Overview */}
+                  <div className="rounded-lg bg-[#FF6154]/5 p-4">
+                    <div className="mb-3 flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="mb-2 font-bold text-gray-900 text-lg">
+                          {founderProfile.productName}
+                        </h3>
+                        {founderProfile.productUrl && (
+                          <a
+                            href={founderProfile.productUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-[#FF6154] text-sm hover:underline">
+                            {founderProfile.productUrl}
+                            <svg
+                              className="ml-1 h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              aria-hidden="true">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
+                      {founderProfile.startedDate && (
+                        <div className="rounded-lg bg-white px-3 py-1 text-gray-600 text-sm">
+                          Started:{" "}
+                          {new Date(
+                            founderProfile.startedDate,
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-700">
+                      {founderProfile.description}
+                    </p>
+                  </div>
+
+                  {/* Product Details Grid */}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                      <p className="mb-1 font-medium text-gray-500 text-sm">
+                        Stage
+                      </p>
+                      <p className="text-gray-900">
+                        {founderProfile.stage.charAt(0).toUpperCase() +
+                          founderProfile.stage.slice(1)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+                      <p className="mb-1 font-medium text-gray-500 text-sm">
+                        Looking For Skill
+                      </p>
+                      <p className="text-gray-900">
+                        {founderProfile.lookingForSkill}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <p className="mt-4 font-medium text-gray-900">
+                    No product information yet
+                  </p>
+                  <p className="mt-1 text-gray-600 text-sm">
+                    Add your product details to showcase what you're building
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/onboarding/founder")}
+                    className="mt-4 rounded-lg bg-[#FF6154] px-6 py-2 font-medium text-sm text-white transition-colors hover:bg-[#ff4f40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
+                    Add Product Details
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Profile Avatar Card */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 font-bold text-gray-900 text-xl">
-              Profile Avatar
+              Profile Picture
             </h2>
-            <div className="flex items-center gap-6">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#FF6154] font-bold text-3xl text-white">
-                {session.user?.name?.charAt(0).toUpperCase() || "U"}
+
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              {/* Current Avatar/Picture */}
+              <div className="shrink-0">
+                {session.user?.profilePicture && !imageError ? (
+                  <Image
+                    src={session.user.profilePicture}
+                    alt="Profile"
+                    width={96}
+                    height={96}
+                    className="h-24 w-24 rounded-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#FF6154] font-bold text-3xl text-white">
+                    {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="mb-2 text-gray-600 text-sm">
-                  Your avatar is generated from your initials
-                </p>
+
+              {/* Upload Section */}
+              <div className="flex-1">
                 <button
                   type="button"
-                  className="rounded-lg border border-gray-200 px-4 py-2 font-medium text-gray-700 text-sm transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6154] focus-visible:ring-offset-2">
-                  Upload Photo
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() =>
+                    document.getElementById("avatar-file-input")?.click()
+                  }
+                  className={`w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                    isDragging
+                      ? "border-[#FF6154] bg-[#FF6154]/5"
+                      : "border-gray-300 bg-gray-50 hover:border-gray-400"
+                  }`}>
+                  {isUploading ? (
+                    <div className="py-4">
+                      <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#FF6154] border-t-transparent"></div>
+                      <p className="mt-3 text-gray-600 text-sm">Uploading...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <p className="mt-2 text-gray-600 text-sm">
+                        Drag and drop your photo here, or click to choose
+                      </p>
+                      <p className="mt-2 text-gray-500 text-xs">
+                        PNG, JPG up to 5MB
+                      </p>
+                    </>
+                  )}
                 </button>
+
+                <input
+                  id="avatar-file-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                {uploadError && (
+                  <div className="mt-3 rounded-lg bg-red-50 p-3 text-red-700 text-sm">
+                    {uploadError}
+                  </div>
+                )}
               </div>
             </div>
           </div>

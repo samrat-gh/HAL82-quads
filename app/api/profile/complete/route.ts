@@ -46,23 +46,25 @@ export async function POST(request: Request) {
       },
     });
 
-    // Upsert profile with website and social links
-    await prisma.profile.upsert({
-      where: { userId: user.id },
-      create: {
-        userId: user.id,
-        websiteUrl,
-        socialLinkedIn: socialLinkedIn || null,
-        socialTwitter: socialTwitter || null,
-        socialGithub: socialGithub || null,
-      },
-      update: {
-        websiteUrl,
-        socialLinkedIn: socialLinkedIn || null,
-        socialTwitter: socialTwitter || null,
-        socialGithub: socialGithub || null,
-      },
-    });
+    // Upsert profile with website and social links (only if at least one field is provided)
+    if (websiteUrl || socialLinkedIn || socialTwitter || socialGithub) {
+      await prisma.profile.upsert({
+        where: { userId: user.id },
+        create: {
+          userId: user.id,
+          websiteUrl: websiteUrl || null,
+          socialLinkedIn: socialLinkedIn || null,
+          socialTwitter: socialTwitter || null,
+          socialGithub: socialGithub || null,
+        },
+        update: {
+          websiteUrl: websiteUrl || null,
+          socialLinkedIn: socialLinkedIn || null,
+          socialTwitter: socialTwitter || null,
+          socialGithub: socialGithub || null,
+        },
+      });
+    }
 
     if (experiences && experiences.length > 0) {
       await prisma.experience.deleteMany({

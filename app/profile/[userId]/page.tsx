@@ -23,6 +23,10 @@ interface ProfileData {
     socialTwitter: string | null;
     socialLinkedIn: string | null;
     socialGithub: string | null;
+    socialInstagram: string | null;
+    currentUsers: number | null;
+    monthlyTraffic: number | null;
+    monthlyRevenue: number | null;
   };
   experiences?: Array<{
     id: string;
@@ -36,6 +40,8 @@ interface ProfileData {
   founderProfile?: {
     productName: string;
     description: string;
+    productUrl: string;
+    startedDate: string;
     stage: string;
     lookingForSkill: string;
     commitmentRequired: string;
@@ -114,8 +120,8 @@ export default function ProfileViewPage() {
     return null;
   }
 
-  const isFounder = profile.user.role === "FOUNDER";
-  const isCofounder = profile.user.role === "COFOUNDER";
+  const isFounder = profile.user.role?.toLowerCase() === "founder";
+  const isCofounder = profile.user.role?.toLowerCase() === "cofounder";
 
   return (
     <div className="min-h-screen bg-white">
@@ -165,6 +171,11 @@ export default function ProfileViewPage() {
                 </h1>
                 <p className="text-gray-600">
                   {formatLabel(profile.user.role)}
+                  {isFounder && profile.founderProfile && (
+                    <span className="ml-2 text-[#FF6154]">
+                      • {profile.founderProfile.productName}
+                    </span>
+                  )}
                 </p>
                 {profile.user.location && (
                   <p className="mt-1 text-gray-500 text-sm">
@@ -179,8 +190,80 @@ export default function ProfileViewPage() {
               </div>
             </div>
 
+            {/* Product Info - For Founders */}
+            {isFounder && profile.founderProfile && (
+              <div className="mt-6">
+                <div className="rounded-xl border-2 border-[#FF6154]/20 bg-linear-to-br from-[#FF6154]/5 to-orange-50 p-5">
+                  <div className="mb-4 flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="font-semibold text-[#FF6154] text-xs uppercase tracking-wide">
+                          Building
+                        </span>
+                        {profile.founderProfile.startedDate && (
+                          <span className="text-gray-500 text-xs">
+                            • Started{" "}
+                            {new Date(
+                              profile.founderProfile.startedDate,
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="mb-2 font-bold text-gray-900 text-xl">
+                        {profile.founderProfile.productName}
+                      </h2>
+                      <p className="text-gray-700 leading-relaxed">
+                        {profile.founderProfile.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {profile.founderProfile.productUrl && (
+                      <a
+                        href={profile.founderProfile.productUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#FF6154] px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-[#FF6154]/90">
+                        Visit Product
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          aria-hidden="true">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
+                        </svg>
+                      </a>
+                    )}
+                    <div className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-gray-700 text-sm">
+                      <span className="font-medium">Stage:</span>
+                      <span>{formatLabel(profile.founderProfile.stage)}</span>
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-gray-700 text-sm">
+                      <span className="font-medium">Looking for:</span>
+                      <span>
+                        {formatLabel(profile.founderProfile.lookingForSkill)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {profile.user.bio && (
               <div className="mt-4 rounded-lg bg-gray-50 p-4">
+                <h3 className="mb-2 font-semibold text-gray-900 text-sm">
+                  About
+                </h3>
                 <p className="text-gray-700">{profile.user.bio}</p>
               </div>
             )}
@@ -286,9 +369,61 @@ export default function ProfileViewPage() {
                       <span className="text-gray-600">GitHub</span>
                     </a>
                   )}
+                  {profile.profile.socialInstagram && (
+                    <a
+                      href={profile.profile.socialInstagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100">
+                      <span className="text-gray-600">Instagram</span>
+                    </a>
+                  )}
                 </div>
               </div>
             )}
+
+            {profile.profile &&
+              (profile.profile.currentUsers ||
+                profile.profile.monthlyTraffic ||
+                profile.profile.monthlyRevenue) && (
+                <div>
+                  <h2 className="mb-4 font-bold text-gray-900 text-xl">
+                    Traction Metrics
+                  </h2>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {profile.profile.currentUsers !== null && (
+                      <div className="rounded-lg border border-gray-100 bg-linear-to-br from-blue-50 to-blue-100 p-4">
+                        <p className="mb-1 text-gray-600 text-sm">
+                          Current Users
+                        </p>
+                        <p className="font-bold text-2xl text-gray-900">
+                          {profile.profile.currentUsers.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                    {profile.profile.monthlyTraffic !== null && (
+                      <div className="rounded-lg border border-gray-100 bg-linear-to-br from-purple-50 to-purple-100 p-4">
+                        <p className="mb-1 text-gray-600 text-sm">
+                          Monthly Traffic
+                        </p>
+                        <p className="font-bold text-2xl text-gray-900">
+                          {profile.profile.monthlyTraffic.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                    {profile.profile.monthlyRevenue !== null && (
+                      <div className="rounded-lg border border-gray-100 bg-linear-to-br from-green-50 to-green-100 p-4">
+                        <p className="mb-1 text-gray-600 text-sm">
+                          Monthly Revenue
+                        </p>
+                        <p className="font-bold text-2xl text-gray-900">
+                          ${profile.profile.monthlyRevenue.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
             {profile.experiences && profile.experiences.length > 0 && (
               <div>
@@ -348,35 +483,10 @@ export default function ProfileViewPage() {
             {isFounder && profile.founderProfile && (
               <div>
                 <h2 className="mb-4 font-bold text-gray-900 text-xl">
-                  Project Details
+                  Work Style & Preferences
                 </h2>
 
-                <div className="mb-6 rounded-lg bg-[#FF6154]/5 p-4">
-                  <h3 className="mb-2 font-bold text-gray-900 text-lg">
-                    {profile.founderProfile.productName}
-                  </h3>
-                  <p className="text-gray-700">
-                    {profile.founderProfile.description}
-                  </p>
-                </div>
-
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-lg border border-gray-100 p-4">
-                    <p className="mb-1 text-gray-600 text-sm">Stage</p>
-                    <p className="font-medium text-gray-900">
-                      {formatLabel(profile.founderProfile.stage)}
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border border-gray-100 p-4">
-                    <p className="mb-1 text-gray-600 text-sm">
-                      Looking For Skill
-                    </p>
-                    <p className="font-medium text-gray-900">
-                      {formatLabel(profile.founderProfile.lookingForSkill)}
-                    </p>
-                  </div>
-
                   <div className="rounded-lg border border-gray-100 p-4">
                     <p className="mb-1 text-gray-600 text-sm">
                       Commitment Required

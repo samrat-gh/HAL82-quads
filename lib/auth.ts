@@ -71,6 +71,20 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.profilePicture = user.profilePicture;
       }
+
+      // Refresh profile picture from database on each request
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { userId: token.id as string },
+          select: { profilePicture: true, role: true },
+        });
+
+        if (dbUser) {
+          token.profilePicture = dbUser.profilePicture;
+          token.role = dbUser.role;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {

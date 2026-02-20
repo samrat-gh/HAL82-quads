@@ -30,16 +30,7 @@ export default function CompleteProfilePage() {
   const [socialLinkedIn, setSocialLinkedIn] = useState("");
   const [socialTwitter, setSocialTwitter] = useState("");
   const [socialGithub, setSocialGithub] = useState("");
-  const [experiences, setExperiences] = useState<Experience[]>([
-    {
-      title: "",
-      company: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      isCurrent: false,
-    },
-  ]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -62,9 +53,7 @@ export default function CompleteProfilePage() {
   };
 
   const removeExperience = (index: number) => {
-    if (experiences.length > 1) {
-      setExperiences(experiences.filter((_, i) => i !== index));
-    }
+    setExperiences(experiences.filter((_, i) => i !== index));
   };
 
   const updateExperience = (
@@ -146,13 +135,7 @@ export default function CompleteProfilePage() {
     setError("");
     setIsLoading(true);
 
-    if (
-      !profilePictureUrl ||
-      !bio ||
-      !location ||
-      !websiteUrl ||
-      !yearsOfExperience
-    ) {
+    if (!profilePictureUrl || !bio || !location || !yearsOfExperience) {
       setError("Please fill all required fields");
       setIsLoading(false);
       return;
@@ -161,12 +144,6 @@ export default function CompleteProfilePage() {
     const validExperiences = experiences.filter(
       (exp) => exp.title && exp.company && exp.startDate,
     );
-
-    if (validExperiences.length === 0) {
-      setError("Please add at least one work experience");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const response = await fetch("/api/profile/complete", {
@@ -178,18 +155,19 @@ export default function CompleteProfilePage() {
           location,
           phoneNumber: phoneNumber || undefined,
           yearsOfExperience: Number.parseInt(yearsOfExperience),
-          websiteUrl,
+          websiteUrl: websiteUrl || undefined,
           socialLinkedIn: socialLinkedIn || undefined,
           socialTwitter: socialTwitter || undefined,
           socialGithub: socialGithub || undefined,
-          experiences: validExperiences,
+          experiences:
+            validExperiences.length > 0 ? validExperiences : undefined,
         }),
       });
 
       if (response.ok) {
-        if (session?.user?.role === "FOUNDER") {
+        if (session?.user?.role?.toLowerCase() === "founder") {
           router.push("/onboarding/founder");
-        } else if (session?.user?.role === "COFOUNDER") {
+        } else if (session?.user?.role?.toLowerCase() === "cofounder") {
           router.push("/onboarding/cofounder");
         } else {
           router.push("/dashboard");
@@ -388,7 +366,7 @@ export default function CompleteProfilePage() {
             <div className="space-y-4">
               <div>
                 <label className="mb-2 block font-medium text-gray-700 text-sm">
-                  Website URL <span className="text-[#FF6154]">*</span>
+                  Website URL
                 </label>
                 <input
                   type="url"
@@ -396,7 +374,6 @@ export default function CompleteProfilePage() {
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
                   placeholder="https://yourwebsite.com"
-                  required
                 />
               </div>
 
@@ -443,9 +420,18 @@ export default function CompleteProfilePage() {
 
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-bold text-gray-900 text-xl">
-                Work Experience <span className="text-[#FF6154]">*</span>
-              </h2>
+              <div>
+                <h2 className="font-bold text-gray-900 text-xl">
+                  Work Experience{" "}
+                  <span className="font-normal text-gray-500 text-sm">
+                    (Optional)
+                  </span>
+                </h2>
+                <p className="mt-1 text-gray-600 text-sm">
+                  Add your work history to help others understand your
+                  background
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={addExperience}
@@ -454,124 +440,143 @@ export default function CompleteProfilePage() {
               </button>
             </div>
 
-            <div className="space-y-6">
-              {experiences.map((exp, index) => (
-                <div
-                  key={index}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900">
-                      Experience {index + 1}
-                    </h3>
-                    {experiences.length > 1 && (
+            {experiences.length === 0 ? (
+              <div className="rounded-lg border-2 border-gray-300 border-dashed bg-gray-50 px-6 py-12 text-center">
+                <p className="text-gray-600 text-sm">
+                  No work experience added yet. Click "+ Add Experience" to add
+                  your work history.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {experiences.map((exp, index) => (
+                  <div
+                    key={index}
+                    className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="font-medium text-gray-900">
+                        Experience {index + 1}
+                      </h3>
                       <button
                         type="button"
                         onClick={() => removeExperience(index)}
                         className="text-red-600 text-sm hover:text-red-700">
                         Remove
                       </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-2 block font-medium text-gray-700 text-sm">
-                          Job Title <span className="text-[#FF6154]">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={exp.title}
-                          onChange={(e) =>
-                            updateExperience(index, "title", e.target.value)
-                          }
-                          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
-                          placeholder="Software Engineer"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="mb-2 block font-medium text-gray-700 text-sm">
-                          Company <span className="text-[#FF6154]">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={exp.company}
-                          onChange={(e) =>
-                            updateExperience(index, "company", e.target.value)
-                          }
-                          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
-                          placeholder="Tech Corp"
-                          required
-                        />
-                      </div>
                     </div>
 
-                    <div>
-                      <label className="mb-2 block font-medium text-gray-700 text-sm">
-                        Description
+                    <div className="space-y-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block font-medium text-gray-700 text-sm">
+                            Job Title <span className="text-[#FF6154]">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={exp.title}
+                            onChange={(e) =>
+                              updateExperience(index, "title", e.target.value)
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
+                            placeholder="Software Engineer"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block font-medium text-gray-700 text-sm">
+                            Company <span className="text-[#FF6154]">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={exp.company}
+                            onChange={(e) =>
+                              updateExperience(index, "company", e.target.value)
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
+                            placeholder="Tech Corp"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block font-medium text-gray-700 text-sm">
+                          Description
+                        </label>
+                        <textarea
+                          value={exp.description}
+                          onChange={(e) =>
+                            updateExperience(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                          rows={2}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
+                          placeholder="Describe your role and achievements..."
+                        />
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block font-medium text-gray-700 text-sm">
+                            Start Date <span className="text-[#FF6154]">*</span>
+                          </label>
+                          <input
+                            type="month"
+                            value={exp.startDate}
+                            onChange={(e) =>
+                              updateExperience(
+                                index,
+                                "startDate",
+                                e.target.value,
+                              )
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block font-medium text-gray-700 text-sm">
+                            End Date
+                          </label>
+                          <input
+                            type="month"
+                            value={exp.endDate}
+                            onChange={(e) =>
+                              updateExperience(index, "endDate", e.target.value)
+                            }
+                            disabled={exp.isCurrent}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20 disabled:bg-gray-100"
+                          />
+                        </div>
+                      </div>
+
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={exp.isCurrent}
+                          onChange={(e) =>
+                            updateExperience(
+                              index,
+                              "isCurrent",
+                              e.target.checked,
+                            )
+                          }
+                          className="h-4 w-4 rounded border-gray-300 text-[#FF6154] focus:ring-[#FF6154]"
+                        />
+                        <span className="text-gray-700 text-sm">
+                          I currently work here
+                        </span>
                       </label>
-                      <textarea
-                        value={exp.description}
-                        onChange={(e) =>
-                          updateExperience(index, "description", e.target.value)
-                        }
-                        rows={2}
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
-                        placeholder="Describe your role and achievements..."
-                      />
                     </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-2 block font-medium text-gray-700 text-sm">
-                          Start Date <span className="text-[#FF6154]">*</span>
-                        </label>
-                        <input
-                          type="month"
-                          value={exp.startDate}
-                          onChange={(e) =>
-                            updateExperience(index, "startDate", e.target.value)
-                          }
-                          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="mb-2 block font-medium text-gray-700 text-sm">
-                          End Date
-                        </label>
-                        <input
-                          type="month"
-                          value={exp.endDate}
-                          onChange={(e) =>
-                            updateExperience(index, "endDate", e.target.value)
-                          }
-                          disabled={exp.isCurrent}
-                          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-[#FF6154] focus:outline-none focus:ring-2 focus:ring-[#FF6154]/20 disabled:bg-gray-100"
-                        />
-                      </div>
-                    </div>
-
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={exp.isCurrent}
-                        onChange={(e) =>
-                          updateExperience(index, "isCurrent", e.target.checked)
-                        }
-                        className="h-4 w-4 rounded border-gray-300 text-[#FF6154] focus:ring-[#FF6154]"
-                      />
-                      <span className="text-gray-700 text-sm">
-                        I currently work here
-                      </span>
-                    </label>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {error && (
