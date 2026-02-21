@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import { DashboardNav } from "@/components/dashboard-nav";
 
 interface ProfileData {
+  bio: string;
+  location: string;
+  phoneNumber: string;
+  yearsOfExperience: string;
   websiteUrl: string;
   socialTwitter: string;
   socialLinkedIn: string;
@@ -14,6 +18,16 @@ interface ProfileData {
   currentUsers: string;
   monthlyTraffic: string;
   monthlyRevenue: string;
+}
+
+interface Experience {
+  id?: string;
+  title: string;
+  company: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
 }
 
 interface CofounderProfileData {
@@ -37,6 +51,10 @@ export default function CreateProfilePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState<ProfileData>({
+    bio: "",
+    location: "",
+    phoneNumber: "",
+    yearsOfExperience: "",
     websiteUrl: "",
     socialTwitter: "",
     socialLinkedIn: "",
@@ -46,6 +64,16 @@ export default function CreateProfilePage() {
     monthlyTraffic: "",
     monthlyRevenue: "",
   });
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [newExperience, setNewExperience] = useState<Experience>({
+    title: "",
+    company: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    isCurrent: false,
+  });
+  const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [cofounderData, setCofounderData] = useState<CofounderProfileData>({
     primarySkill: "TECH",
     secondarySkill: "",
@@ -68,11 +96,28 @@ export default function CreateProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        // Fetch user data to get bio, location, phoneNumber, yearsOfExperience
+        const userResponse = await fetch("/api/user");
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          if (userData.user) {
+            setFormData((prev) => ({
+              ...prev,
+              bio: userData.user.bio || "",
+              location: userData.user.location || "",
+              phoneNumber: userData.user.phoneNumber || "",
+              yearsOfExperience:
+                userData.user.yearsOfExperience?.toString() || "",
+            }));
+          }
+        }
+
         const response = await fetch("/api/profile");
         if (response.ok) {
           const data = await response.json();
           if (data.profile) {
-            setFormData({
+            setFormData((prev) => ({
+              ...prev,
               websiteUrl: data.profile.websiteUrl || "",
               socialTwitter: data.profile.socialTwitter || "",
               socialLinkedIn: data.profile.socialLinkedIn || "",
@@ -81,7 +126,16 @@ export default function CreateProfilePage() {
               currentUsers: data.profile.currentUsers?.toString() || "",
               monthlyTraffic: data.profile.monthlyTraffic?.toString() || "",
               monthlyRevenue: data.profile.monthlyRevenue?.toString() || "",
-            });
+            }));
+          }
+        }
+
+        // Fetch experiences
+        const expResponse = await fetch(`/api/user`);
+        if (expResponse.ok) {
+          const expData = await expResponse.json();
+          if (expData.user?.experiences) {
+            setExperiences(expData.user.experiences);
           }
         }
 
@@ -127,6 +181,25 @@ export default function CreateProfilePage() {
     setIsLoading(true);
 
     try {
+      // Update user basic info (bio, location, phoneNumber, yearsOfExperience)
+      const userUpdateResponse = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bio: formData.bio,
+          location: formData.location,
+          phoneNumber: formData.phoneNumber,
+          yearsOfExperience: formData.yearsOfExperience
+            ? parseInt(formData.yearsOfExperience)
+            : null,
+        }),
+      });
+
+      if (!userUpdateResponse.ok) {
+        const userData = await userUpdateResponse.json();
+        throw new Error(userData.error || "Failed to update user info");
+      }
+
       // Save basic profile
       const response = await fetch("/api/profile", {
         method: "POST",
@@ -176,6 +249,106 @@ export default function CreateProfilePage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleExperienceChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const value =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value;
+    setNewExperience((prev) => ({
+      ...prev,
+      [e.target.name]: value,
+    }));
+  };
+
+  const addExperience = async () => {
+    if (
+      !newExperience.title ||
+      !newExperience.company ||
+      !newExperience.startDate
+    ) {
+      setError(
+        "Please fill in required experience fields (Title, Company, Start Date)",
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/experience", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newExperience),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add experience");
+      }
+
+      const data = await response.json();
+      setExperiences([...experiences, data.experience]);
+      setNewExperience({
+        title: "",
+        company: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        isCurrent: false,
+      });
+      setSuccess("Experience added!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add experience");
+    }
+  };
+
+  const updateExperience = async (id: string) => {
+    const expToUpdate = experiences.find((exp) => exp.id === id);
+    if (!expToUpdate) return;
+
+    try {
+      const response = await fetch(`/api/experience/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expToUpdate),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update experience");
+      }
+
+      setEditingExpId(null);
+      setSuccess("Experience updated!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update experience",
+      );
+    }
+  };
+
+  const deleteExperience = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this experience?")) return;
+
+    try {
+      const response = await fetch(`/api/experience/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete experience");
+      }
+
+      setExperiences(experiences.filter((exp) => exp.id !== id));
+      setSuccess("Experience deleted!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete experience",
+      );
+    }
   };
 
   const handleCofounderChange = (
@@ -236,6 +409,270 @@ export default function CreateProfilePage() {
               {success}
             </div>
           )}
+
+          {/* Personal Information */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h2 className="mb-6 font-bold text-gray-900 text-xl">
+              Personal Information
+            </h2>
+
+            <div className="space-y-5">
+              <div>
+                <label
+                  htmlFor="bio"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Bio
+                </label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  rows={4}
+                  value={formData.bio}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
+                  placeholder="Tell us about yourself and your background..."
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="location"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Location
+                </label>
+                <input
+                  id="location"
+                  name="location"
+                  type="text"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
+                  placeholder="San Francisco, CA"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phoneNumber"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Phone Number
+                </label>
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="yearsOfExperience"
+                  className="mb-2 block font-semibold text-gray-900 text-sm">
+                  Years of Experience
+                </label>
+                <input
+                  id="yearsOfExperience"
+                  name="yearsOfExperience"
+                  type="number"
+                  min="0"
+                  value={formData.yearsOfExperience}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]"
+                  placeholder="5"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Work Experience */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h2 className="mb-6 font-bold text-gray-900 text-xl">
+              Work Experience
+            </h2>
+
+            {/* Existing Experiences */}
+            {experiences.length > 0 && (
+              <div className="mb-6 space-y-4">
+                {experiences.map((exp) => (
+                  <div
+                    key={exp.id}
+                    className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    {editingExpId === exp.id ? (
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={exp.title}
+                          onChange={(e) =>
+                            setExperiences(
+                              experiences.map((existing) =>
+                                existing.id === exp.id
+                                  ? { ...existing, title: e.target.value }
+                                  : existing,
+                              ),
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                          placeholder="Job Title"
+                        />
+                        <input
+                          type="text"
+                          value={exp.company}
+                          onChange={(e) =>
+                            setExperiences(
+                              experiences.map((existing) =>
+                                existing.id === exp.id
+                                  ? { ...existing, company: e.target.value }
+                                  : existing,
+                              ),
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                          placeholder="Company"
+                        />
+                        <textarea
+                          value={exp.description}
+                          onChange={(e) =>
+                            setExperiences(
+                              experiences.map((existing) =>
+                                existing.id === exp.id
+                                  ? { ...existing, description: e.target.value }
+                                  : existing,
+                              ),
+                            )
+                          }
+                          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                          placeholder="Description"
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => exp.id && updateExperience(exp.id)}
+                            className="rounded-lg bg-[#FF6154] px-3 py-1.5 text-sm text-white hover:bg-[#ff4f40]">
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingExpId(null)}
+                            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-100">
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mb-2 flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">
+                              {exp.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm">
+                              {exp.company}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => exp.id && setEditingExpId(exp.id)}
+                              className="text-[#FF6154] text-sm hover:underline">
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => exp.id && deleteExperience(exp.id)}
+                              className="text-red-600 text-sm hover:underline">
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        {exp.description && (
+                          <p className="text-gray-600 text-sm">
+                            {exp.description}
+                          </p>
+                        )}
+                        <p className="mt-2 text-gray-500 text-xs">
+                          {exp.startDate} -{" "}
+                          {exp.isCurrent ? "Present" : exp.endDate}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add New Experience */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-900">
+                Add New Experience
+              </h3>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  name="title"
+                  value={newExperience.title}
+                  onChange={handleExperienceChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                  placeholder="Job Title *"
+                />
+                <input
+                  type="text"
+                  name="company"
+                  value={newExperience.company}
+                  onChange={handleExperienceChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                  placeholder="Company *"
+                />
+                <textarea
+                  name="description"
+                  value={newExperience.description}
+                  onChange={handleExperienceChange}
+                  className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                  placeholder="Description (optional)"
+                  rows={3}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="month"
+                    name="startDate"
+                    value={newExperience.startDate}
+                    onChange={handleExperienceChange}
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
+                  />
+                  <input
+                    type="month"
+                    name="endDate"
+                    value={newExperience.endDate}
+                    onChange={handleExperienceChange}
+                    disabled={newExperience.isCurrent}
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm disabled:bg-gray-100"
+                  />
+                </div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="isCurrent"
+                    checked={newExperience.isCurrent}
+                    onChange={handleExperienceChange}
+                    className="h-4 w-4 rounded border-gray-300 text-[#FF6154]"
+                  />
+                  <span className="text-gray-700 text-sm">
+                    I currently work here
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={addExperience}
+                  className="rounded-lg border border-[#FF6154] px-4 py-2 text-[#FF6154] text-sm hover:bg-[#FF6154] hover:text-white">
+                  Add Experience
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Website Information */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">

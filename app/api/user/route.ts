@@ -25,6 +25,11 @@ export async function GET() {
         phoneNumber: true,
         yearsOfExperience: true,
         profileCompleted: true,
+        experiences: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
 
@@ -36,6 +41,38 @@ export async function GET() {
   } catch (_error) {
     return NextResponse.json(
       { error: "Failed to fetch user" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { bio, location, phoneNumber, yearsOfExperience } = body;
+
+    const user = await prisma.user.update({
+      where: { userId: session.user.id },
+      data: {
+        bio,
+        location,
+        phoneNumber,
+        yearsOfExperience: yearsOfExperience
+          ? parseInt(yearsOfExperience)
+          : null,
+      },
+    });
+
+    return NextResponse.json({ user });
+  } catch (_error) {
+    return NextResponse.json(
+      { error: "Failed to update user" },
       { status: 500 },
     );
   }
