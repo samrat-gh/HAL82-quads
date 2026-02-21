@@ -16,6 +16,19 @@ interface ProfileData {
   monthlyRevenue: string;
 }
 
+interface CofounderProfileData {
+  primarySkill: string;
+  secondarySkill: string;
+  experienceLevel: string;
+  preferredStage: string;
+  availability: string;
+  activelySeeking: boolean;
+  riskAppetite: string;
+  workSpeed: string;
+  decisionStyle: string;
+  ambitionLevel: string;
+}
+
 export default function CreateProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -32,6 +45,18 @@ export default function CreateProfilePage() {
     currentUsers: "",
     monthlyTraffic: "",
     monthlyRevenue: "",
+  });
+  const [cofounderData, setCofounderData] = useState<CofounderProfileData>({
+    primarySkill: "TECH",
+    secondarySkill: "",
+    experienceLevel: "MID",
+    preferredStage: "MVP",
+    availability: "FULL_TIME",
+    activelySeeking: false,
+    riskAppetite: "BALANCED",
+    workSpeed: "FAST",
+    decisionStyle: "DATA_DRIVEN",
+    ambitionLevel: "SCALABLE",
   });
 
   useEffect(() => {
@@ -59,6 +84,30 @@ export default function CreateProfilePage() {
             });
           }
         }
+
+        // Fetch cofounder profile if user is a cofounder
+        if (session?.user?.role?.toLowerCase() === "cofounder") {
+          const cofounderResponse = await fetch("/api/cofounder-profile");
+          if (cofounderResponse.ok) {
+            const cofounderData = await cofounderResponse.json();
+            if (cofounderData.profile) {
+              setCofounderData({
+                primarySkill: cofounderData.profile.primarySkill || "TECH",
+                secondarySkill: cofounderData.profile.secondarySkill || "",
+                experienceLevel: cofounderData.profile.experienceLevel || "MID",
+                preferredStage: cofounderData.profile.preferredStage || "MVP",
+                availability: cofounderData.profile.availability || "FULL_TIME",
+                activelySeeking: cofounderData.profile.activelySeeking || false,
+                riskAppetite: cofounderData.profile.riskAppetite || "BALANCED",
+                workSpeed: cofounderData.profile.workSpeed || "FAST",
+                decisionStyle:
+                  cofounderData.profile.decisionStyle || "DATA_DRIVEN",
+                ambitionLevel:
+                  cofounderData.profile.ambitionLevel || "SCALABLE",
+              });
+            }
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
       } finally {
@@ -69,7 +118,7 @@ export default function CreateProfilePage() {
     if (status === "authenticated") {
       fetchProfile();
     }
-  }, [status]);
+  }, [status, session?.user?.role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +127,7 @@ export default function CreateProfilePage() {
     setIsLoading(true);
 
     try {
+      // Save basic profile
       const response = await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,6 +138,22 @@ export default function CreateProfilePage() {
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to save profile");
+      }
+
+      // Save cofounder profile if user is a cofounder
+      if (session?.user?.role?.toLowerCase() === "cofounder") {
+        const cofounderResponse = await fetch("/api/cofounder-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cofounderData),
+        });
+
+        if (!cofounderResponse.ok) {
+          const cofounderData = await cofounderResponse.json();
+          throw new Error(
+            cofounderData.error || "Failed to save cofounder profile",
+          );
+        }
       }
 
       setSuccess("Profile saved successfully!");
@@ -102,11 +168,26 @@ export default function CreateProfilePage() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleCofounderChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const value =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value;
+    setCofounderData((prev) => ({
+      ...prev,
+      [e.target.name]: value,
     }));
   };
 
@@ -329,6 +410,219 @@ export default function CreateProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Co-Founder Profile Section (Only for Co-Founders) */}
+          {session?.user?.role?.toLowerCase() === "cofounder" && (
+            <>
+              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <h2 className="mb-6 font-bold text-gray-900 text-xl">
+                  Skills & Experience
+                </h2>
+
+                <div className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="primarySkill"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Primary Skill <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="primarySkill"
+                      name="primarySkill"
+                      value={cofounderData.primarySkill}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="TECH">Tech</option>
+                      <option value="DESIGN">Design</option>
+                      <option value="GROWTH">Growth</option>
+                      <option value="OPS">Ops</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="secondarySkill"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Secondary Skill{" "}
+                      <span className="font-normal text-gray-500">
+                        (Optional)
+                      </span>
+                    </label>
+                    <select
+                      id="secondarySkill"
+                      name="secondarySkill"
+                      value={cofounderData.secondarySkill}
+                      onChange={handleCofounderChange}
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="">None</option>
+                      <option value="TECH">Tech</option>
+                      <option value="DESIGN">Design</option>
+                      <option value="GROWTH">Growth</option>
+                      <option value="OPS">Ops</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="experienceLevel"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Experience Level <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="experienceLevel"
+                      name="experienceLevel"
+                      value={cofounderData.experienceLevel}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="JUNIOR">Junior (0-2 years)</option>
+                      <option value="MID">Mid (3-5 years)</option>
+                      <option value="SENIOR">Senior (6+ years)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <h2 className="mb-6 font-bold text-gray-900 text-xl">
+                  Preferences
+                </h2>
+
+                <div className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="preferredStage"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Preferred Project Stage{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="preferredStage"
+                      name="preferredStage"
+                      value={cofounderData.preferredStage}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="IDEA">Idea Stage</option>
+                      <option value="MVP">MVP Stage</option>
+                      <option value="TRACTION">Traction Stage</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="availability"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Availability <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="availability"
+                      name="availability"
+                      value={cofounderData.availability}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="FULL_TIME">Full-time</option>
+                      <option value="PART_TIME">Part-time</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="riskAppetite"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Risk Appetite <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="riskAppetite"
+                      name="riskAppetite"
+                      value={cofounderData.riskAppetite}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="CONSERVATIVE">Conservative</option>
+                      <option value="BALANCED">Balanced</option>
+                      <option value="AGGRESSIVE">Aggressive</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="workSpeed"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Work Speed <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="workSpeed"
+                      name="workSpeed"
+                      value={cofounderData.workSpeed}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="FAST">Fast-paced</option>
+                      <option value="STRUCTURED">Structured</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="decisionStyle"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Decision-Making Style{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="decisionStyle"
+                      name="decisionStyle"
+                      value={cofounderData.decisionStyle}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="DATA_DRIVEN">Data-driven</option>
+                      <option value="INTUITIVE">Intuitive</option>
+                      <option value="COLLABORATIVE">Collaborative</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="ambitionLevel"
+                      className="mb-2 block font-semibold text-gray-900 text-sm">
+                      Ambition Level <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="ambitionLevel"
+                      name="ambitionLevel"
+                      value={cofounderData.ambitionLevel}
+                      onChange={handleCofounderChange}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-4 py-3 text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6154]">
+                      <option value="LIFESTYLE">Lifestyle Business</option>
+                      <option value="SCALABLE">Scalable Startup</option>
+                      <option value="HYPERGROWTH">Hypergrowth</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="activelySeeking"
+                      name="activelySeeking"
+                      checked={cofounderData.activelySeeking}
+                      onChange={handleCofounderChange}
+                      className="h-5 w-5 rounded border-gray-300 text-[#FF6154] transition-colors focus:ring-2 focus:ring-[#FF6154] focus:ring-offset-2"
+                    />
+                    <label
+                      htmlFor="activelySeeking"
+                      className="font-semibold text-gray-900 text-sm">
+                      I am actively seeking opportunities
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Form Actions */}
           <div className="flex gap-4">

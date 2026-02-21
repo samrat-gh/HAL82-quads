@@ -61,36 +61,44 @@ export default function SolutionSection() {
             </div>
           </div>
 
-          <div className="relative rounded-2xl border border-gray-100 bg-gray-50 p-8">
+          <div className="relative aspect-square w-full rounded-2xl border border-gray-200 bg-gray-50 p-8 lg:aspect-auto lg:h-[500px]">
             {/* Simple decorative grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <div className="mb-4 h-2 w-16 rounded bg-gray-200"></div>
-                <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
-                <div className="h-2 w-2/3 rounded bg-gray-100"></div>
+            <div className="grid h-full grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="mb-3 h-2.5 w-14 rounded bg-gray-200"></div>
+                  <div className="mb-2.5 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="h-2 w-3/4 rounded bg-gray-100"></div>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="mb-3 h-2.5 w-14 rounded bg-gray-200"></div>
+                  <div className="mb-2.5 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="h-2 w-3/4 rounded bg-gray-100"></div>
+                </div>
               </div>
-              <div className="mt-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <div className="mb-4 h-2 w-16 rounded bg-[#FF6154]/20"></div>
-                <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
-                <div className="h-2 w-2/3 rounded bg-gray-100"></div>
-              </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <div className="mb-4 h-2 w-16 rounded bg-gray-200"></div>
-                <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
-                <div className="h-2 w-2/3 rounded bg-gray-100"></div>
-              </div>
-              <div className="mt-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                <div className="mb-4 h-2 w-16 rounded bg-[#FF6154]/20"></div>
-                <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
-                <div className="h-2 w-2/3 rounded bg-gray-100"></div>
+              <div className="space-y-4 pt-12">
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="mb-3 h-2.5 w-14 rounded bg-[#FF6154]/20"></div>
+                  <div className="mb-2.5 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="h-2 w-3/4 rounded bg-gray-100"></div>
+                </div>
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="mb-3 h-2.5 w-14 rounded bg-[#FF6154]/20"></div>
+                  <div className="mb-2.5 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="mb-2 h-2 w-full rounded bg-gray-100"></div>
+                  <div className="h-2 w-3/4 rounded bg-gray-100"></div>
+                </div>
               </div>
             </div>
             {/* Overlay badge */}
-            <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-gray-100 bg-white px-6 py-3 text-center shadow-xl">
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-gray-200 bg-white px-10 py-5 text-center shadow-xl">
               <span className="block font-bold text-gray-900 text-lg">
                 Weekly Updates
               </span>
-              <span className="font-medium text-gray-500 text-xs uppercase tracking-widest">
+              <span className="mt-0.5 block font-medium text-[11px] text-gray-500 uppercase tracking-widest">
                 Verified
               </span>
             </div>
